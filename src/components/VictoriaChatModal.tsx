@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, User } from 'lucide-react';
-import avatarImage from '../assets/avatar_full.png';
+import avatarImage from '../assets/jarvis_avatar.png';
 import { aiApi } from '../api/aiApi';
 
 interface Message {

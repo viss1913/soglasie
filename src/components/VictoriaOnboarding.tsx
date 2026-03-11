@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, LogOut, ChevronRight } from 'lucide-react';
-import avatarImage from '../assets/avatar_full.png';
+import avatarImage from '../assets/jarvis_avatar.png';
 import { aiApi } from '../api/aiApi';
 import Markdown from 'react-markdown';
 import type { CJMData } from './CJMFlow';
 import { GOAL_GALLERY_ITEMS } from '../utils/GoalImages';
-import StepRiskProfile from './steps/StepRiskProfile';
 
 type OnboardingStep =
     | 'name'
@@ -15,10 +14,8 @@ type OnboardingStep =
     | 'goal_selection'
     | 'goal_parameters'
     | 'assets'
-    | 'fin_reserve'
     | 'life_insurance'
     | 'income'
-    | 'risk_profile'
     | 'chat';
 
 interface EditingGoal {
@@ -54,8 +51,6 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
     const [aiStage, setAiStage] = useState('anketa1');
     const [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null);
     const [initialCapitalInput, setInitialCapitalInput] = useState<number>(data.initialCapital || 0);
-    const [finInitial, setFinInitial] = useState<number>(data.initialCapital || 0);
-    const [finMonthly, setFinMonthly] = useState<number>(data.monthlyReplenishment || 0);
     const [lifeLimit, setLifeLimit] = useState<number>(data.lifeInsuranceLimit ?? 0);
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(val).replace('₽', 'р.');
@@ -95,18 +90,14 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
                     else if (/цел|выберите цель|какая.*цел|целей вам ближе/i.test(lastContent)) step = 'goal_selection';
                     else if (/параметр.*цел|цель.*параметр|сумма.*цел|срок.*цел|целевую сумму/i.test(lastContent)) step = 'goal_parameters';
                     else if (/капитал|текущий капитал|сбережения|ликвидн/i.test(lastContent)) step = 'assets';
-                    else if (/финансовый резерв|финрезерв|резерв/i.test(lastContent)) step = 'fin_reserve';
                     else if (/защит.*жизн|страхов|нсж|лимит/i.test(lastContent)) step = 'life_insurance';
                     else if (/доход|среднемесячн|ежемесячный доход|ндфл/i.test(lastContent)) step = 'income';
-                    else if (/риск-профил|риск профил|анкет.*риск/i.test(lastContent)) step = 'risk_profile';
                     setCurrentStep(step);
                     if (step === 'age') setAiStage('anketa1');
                     if (step === 'goal_selection' || step === 'goal_parameters') setAiStage('anketaTarget');
                     if (step === 'assets') setAiStage('initialCapital');
-                    if (step === 'fin_reserve') setAiStage('finReserve');
                     if (step === 'life_insurance') setAiStage('LifeInsurance');
                     if (step === 'income') setAiStage('income');
-                    if (step === 'risk_profile') setAiStage('riskProfile');
                 } else {
                     // Start the anketa1 stream by sending "start"
                     setIsTyping(true);
@@ -351,6 +342,7 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
         setData(prev => ({
             ...prev,
             initialCapital: capital,
+            monthlyReplenishment: 0,
             assets: [newAsset]
         }));
         setMessages(prev => [...prev, {
@@ -359,21 +351,19 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
             sender: 'user'
         }]);
 
-        // По умолчанию: 10% капитала в стартовый взнос, 0.5% в месяц на пополнение
-        const startDefault = Math.round(((capital || 0) * 0.1) / 10000) * 10000;
-        const monthlyDefault = Math.round(((capital || 0) * 0.005) / 1000) * 1000;
-        setFinInitial(startDefault);
-        setFinMonthly(monthlyDefault);
-        setCurrentStep('fin_reserve');
-        setAiStage('finReserve');
+        setCurrentStep('life_insurance');
+        setAiStage('LifeInsurance');
 
+        // Дефолт по страховке: 10% капитала * 20 (округляем до 500к)
+        const lifeDefault = Math.round(((capital || 0) * 0.1 * 20) / 500000) * 500000;
+        setLifeLimit(lifeDefault || 1500000);
         setIsTyping(true);
-        const aiMsgId = 'fin_reserve_' + Math.random().toString();
+        const aiMsgId = 'life_insurance_' + Math.random().toString();
         setMessages(prev => [...prev, { id: aiMsgId, text: '', sender: 'jarvis', isStreaming: true }]);
 
         try {
             await aiApi.sendStreamingMessage(
-                'finReserve',
+                'LifeInsurance',
                 'start',
                 chunk => {
                     setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, text: chunk, isStreaming: true } : m));
@@ -385,10 +375,10 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
                 buildHistory(messagesRef.current)
             );
         } catch (err) {
-            console.error('Failed to start finReserve dialogue', err);
+            console.error('Failed to start LifeInsurance dialogue', err);
             setMessages(prev => prev.map(m => m.id === aiMsgId ? {
                 ...m,
-                text: 'Часть капитала важно направить в финансовый резерв. Давайте определим его размер.',
+                text: 'Теперь обсудим защиту жизни: какой страховой капитал вам будет комфортен?',
                 isStreaming: false
             } : m));
             setIsTyping(false);
@@ -1010,120 +1000,7 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
                         </motion.div>
                     )}
 
-                    {currentStep === 'fin_reserve' && !isTyping && (
-                        <motion.div
-                            key="fin-reserve-bubble"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}
-                        >
-                            <div className="message-bubble message-victoria goal-params-bubble">
-                                <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '12px', color: '#1e293b' }}>
-                                    Финансовый резерв
-                                </div>
-                                <div style={{ marginBottom: '16px', fontSize: '14px', color: '#64748b' }}>
-                                    Уточним, какую часть капитала вы готовы выделить сейчас в финрезерв и сколько комфортно докладывать ежемесячно.
-                                </div>
 
-                                <div style={{ marginBottom: '18px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Первоначальный капитал в резерве</span>
-                                        <input
-                                            type="number"
-                                            value={finInitial}
-                                            onChange={e => setFinInitial(parseInt(e.target.value) || 0)}
-                                            style={{ width: '120px', textAlign: 'right', fontWeight: '800', border: 'none', background: 'transparent', outline: 'none', color: '#1e293b' }}
-                                        />
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min={0}
-                                        max={Math.max(initialCapitalInput || 1000000, finInitial || 0)}
-                                        step={10000}
-                                        value={finInitial}
-                                        onChange={e => setFinInitial(parseInt(e.target.value))}
-                                        style={{ width: '100%' }}
-                                    />
-                                </div>
-
-                                <div style={{ marginBottom: '8px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Ежемесячное пополнение</span>
-                                        <input
-                                            type="number"
-                                            value={finMonthly}
-                                            onChange={e => setFinMonthly(parseInt(e.target.value) || 0)}
-                                            className="manual-input"
-                                            style={{ width: '100px', textAlign: 'right', fontWeight: 800, border: 'none', background: 'transparent', outline: 'none', color: '#1e293b' }}
-                                        />
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min={0}
-                                        max={200000}
-                                        step={5000}
-                                        value={finMonthly}
-                                        onChange={e => setFinMonthly(parseInt(e.target.value))}
-                                        style={{ width: '100%' }}
-                                    />
-                                </div>
-
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
-                                    <button
-                                        onClick={async () => {
-                                            setData(prev => ({
-                                                ...prev,
-                                                initialCapital: finInitial,
-                                                monthlyReplenishment: finMonthly
-                                            }));
-                                            // Только показываем ввод в чате, в ИИ не шлём — без лишнего запроса и двух сообщений
-                                            setMessages(prev => [...prev, {
-                                                id: Math.random().toString(),
-                                                text: `На финансовый резерв: стартовая сумма ${formatCurrency(finInitial)}, ежемесячное пополнение ${formatCurrency(finMonthly)}.`,
-                                                sender: 'user'
-                                            }]);
-
-                                            setCurrentStep('life_insurance');
-                                            setAiStage('LifeInsurance');
-                                            // Дефолт по страховке: 10% капитала * 20 (округляем до 500к)
-                                            const lifeDefault = Math.round(((initialCapitalInput || 0) * 0.1 * 20) / 500000) * 500000;
-                                            setLifeLimit(lifeDefault || 1500000);
-                                            setIsTyping(true);
-                                            const aiMsgId = 'life_insurance_' + Math.random().toString();
-                                            setMessages(prev => [...prev, { id: aiMsgId, text: '', sender: 'jarvis', isStreaming: true }]);
-                                            try {
-                                                await aiApi.sendStreamingMessage(
-                                                    'LifeInsurance',
-                                                    'start',
-                                                    chunk => {
-                                                        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, text: chunk, isStreaming: true } : m));
-                                                    },
-                                                    fullText => {
-                                                        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, text: fullText, isStreaming: false } : m));
-                                                        setIsTyping(false);
-                                                    },
-                                                    buildHistory(messagesRef.current)
-                                                );
-                                            } catch (err) {
-                                                console.error('Failed to start LifeInsurance dialogue', err);
-                                                setMessages(prev => prev.map(m => m.id === aiMsgId ? {
-                                                    ...m,
-                                                    text: 'Теперь обсудим защиту жизни: какой страховой капитал вам будет комфортен?',
-                                                    isStreaming: false
-                                                } : m));
-                                                setIsTyping(false);
-                                            }
-                                        }}
-                                        className="btn-primary"
-                                        style={{ padding: '10px 22px', borderRadius: '999px', fontSize: '14px' }}
-                                    >
-                                        Далее <ChevronRight size={18} style={{ marginLeft: '6px' }} />
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
 
                     {currentStep === 'goal_parameters' && editingGoal && !isTyping && (
                         <motion.div
@@ -1430,33 +1307,8 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
                                                 sender: 'user'
                                             }]);
 
-                                            setCurrentStep('risk_profile');
-                                            setAiStage('riskProfile');
-                                            setIsTyping(true);
-                                            const aiMsgId = 'risk_profile_' + Math.random().toString();
-                                            setMessages(prev => [...prev, { id: aiMsgId, text: '', sender: 'jarvis', isStreaming: true }]);
-                                            try {
-                                                await aiApi.sendStreamingMessage(
-                                                    'riskProfile',
-                                                    'start',
-                                                    chunk => {
-                                                        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, text: chunk, isStreaming: true } : m));
-                                                    },
-                                                    fullText => {
-                                                        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, text: fullText, isStreaming: false } : m));
-                                                        setIsTyping(false);
-                                                    },
-                                                    buildHistory(messagesRef.current)
-                                                );
-                                            } catch (err) {
-                                                console.error('Failed to start riskProfile dialogue', err);
-                                                setMessages(prev => prev.map(m => m.id === aiMsgId ? {
-                                                    ...m,
-                                                    text: 'Теперь давайте определим ваш риск-профиль с помощью короткой анкеты.',
-                                                    isStreaming: false
-                                                } : m));
-                                                setIsTyping(false);
-                                            }
+                                            setData(prev => ({ ...prev, riskProfile: 'CONSERVATIVE' }));
+                                            onFinish();
                                         }}
                                         className="btn-primary"
                                         style={{ padding: '10px 22px', borderRadius: '999px', fontSize: '14px' }}
@@ -1468,28 +1320,7 @@ const VictoriaOnboarding: React.FC<VictoriaOnboardingProps> = ({ data, setData, 
                         </motion.div>
                     )}
 
-                    {currentStep === 'risk_profile' && !isTyping && (
-                        <motion.div
-                            key="risk-profile-bubble"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                            style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}
-                        >
-                            <div className="message-bubble message-victoria goal-params-bubble">
-                                <StepRiskProfile
-                                    data={data}
-                                    setData={d => setData(d)}
-                                    onPrev={() => setCurrentStep('income')}
-                                    loading={false}
-                                    onComplete={() => {
-                                        // Без запроса в ИИ — сразу на расчёт
-                                        onFinish();
-                                    }}
-                                />
-                            </div>
-                        </motion.div>
-                    )}
+
                 </AnimatePresence>
             </div>
 

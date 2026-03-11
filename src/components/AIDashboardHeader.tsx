@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Maximize2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { aiApi } from '../api/aiApi';
-import avatarImage from '../assets/avatar_full.png';
+import avatarImage from '../assets/jarvis_avatar.png';
 
 interface AIDashboardHeaderProps {
     clientName: string;
