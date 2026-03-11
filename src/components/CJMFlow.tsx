@@ -78,20 +78,6 @@ const CJMFlow: React.FC<CJMFlowProps> = ({ onComplete, onBack, isNewClient }) =>
             // Construct Goals Payload - фильтруем НСЖ (id=5), не отправляем на расчет
             let goalsToProcess = (data.goals || []).filter(g => g.goal_type_id !== 5);
 
-            // Автоматически добавляем FIN_RESERVE (id=7), если указаны initialCapital или monthlyReplenishment в StepFinReserve
-            // и еще нет цели FIN_RESERVE в списке
-            const hasFinReserveGoal = goalsToProcess.some(g => g.goal_type_id === 7);
-            if (!hasFinReserveGoal && (data.initialCapital || data.monthlyReplenishment)) {
-                goalsToProcess.push({
-                    goal_type_id: 7,
-                    name: 'Финансовый резерв',
-                    initial_capital: data.initialCapital || 0,
-                    monthly_replenishment: data.monthlyReplenishment || 0,
-                    term_months: 12, // FIN_RESERVE всегда 12 месяцев
-                    risk_profile: 'CONSERVATIVE'
-                });
-            }
-
             // Life Insurance (ID 5)
             if (data.lifeInsuranceLimit && data.lifeInsuranceLimit > 0) {
                 const targetCoverage = data.lifeInsuranceLimit;
