@@ -75,8 +75,8 @@ const CJMFlow: React.FC<CJMFlowProps> = ({ onComplete, onBack, isNewClient }) =>
             // Calculate Total Liquid Capital from Assets
             const assetsInitial = (data.assets || []).reduce((sum, a) => sum + (a.current_value || 0), 0);
 
-            // Construct Goals Payload - фильтруем НСЖ (id=5), не отправляем на расчет
-            let goalsToProcess = (data.goals || []).filter(g => g.goal_type_id !== 5);
+            // Construct Goals Payload - фильтруем НСЖ (id=5) и Финрезерв (id=7)
+            let goalsToProcess = (data.goals || []).filter(g => g.goal_type_id !== 5 && g.goal_type_id !== 7);
 
             // Life Insurance (ID 5)
             if (data.lifeInsuranceLimit && data.lifeInsuranceLimit > 0) {

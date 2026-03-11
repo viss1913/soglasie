@@ -396,59 +396,61 @@ const PresentPage: React.FC<PresentPageProps> = ({ clientData, onViewPlan, onSta
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#1e293b' }}>Защита</h3>
                 <div className="presentProtectionGrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
-                    <div
-                        className="premium-card"
-                        style={{
-                            position: 'relative',
-                            border: '1px solid #bbf7d0',
-                            padding: '16px',
-                            overflow: 'hidden',
-                            minHeight: '140px',
-                        }}
-                    >
-                        <img
-                            src={getGoalImage('Финансовый резерв', 7)}
-                            alt=""
+                    {reserveGoal && (
+                        <div
+                            className="premium-card"
                             style={{
-                                position: 'absolute',
-                                inset: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                opacity: 0.2,
+                                position: 'relative',
+                                border: '1px solid #bbf7d0',
+                                padding: '16px',
+                                overflow: 'hidden',
+                                minHeight: '140px',
                             }}
-                        />
-                        <div style={{ position: 'relative', zIndex: 1, background: 'linear-gradient(135deg, rgba(240,253,244,0.92) 0%, rgba(220,252,231,0.92) 100%)', borderRadius: '12px', padding: '14px', height: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{ width: '40px', height: '40px', flexShrink: 0, borderRadius: '12px', background: 'linear-gradient(135deg, #22c55e, #16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(34,197,94,0.3)' }}>
-                                    <PiggyBank size={20} color="#fff" />
-                                </div>
-                                <div style={{ fontWeight: '800', fontSize: '15px', lineHeight: '1.2' }}>Финансовый резерв</div>
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
-                                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Капитал</div>
-                                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.initial)}</div>
-                                </div>
-                                <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
-                                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Пополнение</div>
-                                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.monthly)}<span style={{ fontSize: '10px', color: '#64748b', marginLeft: '2px' }}>/мес</span></div>
-                                </div>
-                                {reserveData.target_amount_future != null && reserveData.target_amount_future > 0 && (
-                                    <div style={{ background: 'rgba(34,197,94,0.12)', padding: '8px 10px', borderRadius: '8px' }}>
-                                        <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Прогноз через год</div>
-                                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#15803d', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.target_amount_future)}</div>
+                        >
+                            <img
+                                src={getGoalImage('Финансовый резерв', 7)}
+                                alt=""
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    opacity: 0.2,
+                                }}
+                            />
+                            <div style={{ position: 'relative', zIndex: 1, background: 'linear-gradient(135deg, rgba(240,253,244,0.92) 0%, rgba(220,252,231,0.92) 100%)', borderRadius: '12px', padding: '14px', height: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '40px', height: '40px', flexShrink: 0, borderRadius: '12px', background: 'linear-gradient(135deg, #22c55e, #16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(34,197,94,0.3)' }}>
+                                        <PiggyBank size={20} color="#fff" />
                                     </div>
-                                )}
-                                <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
-                                    <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Доходность портфеля</div>
-                                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b' }}>
-                                        {reserveData.yieldPercent != null && reserveData.yieldPercent > 0 ? `≈ ${reserveData.yieldPercent}% год.` : '—'}
+                                    <div style={{ fontWeight: '800', fontSize: '15px', lineHeight: '1.2' }}>Финансовый резерв</div>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
+                                        <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Капитал</div>
+                                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.initial)}</div>
+                                    </div>
+                                    <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
+                                        <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Пополнение</div>
+                                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.monthly)}<span style={{ fontSize: '10px', color: '#64748b', marginLeft: '2px' }}>/мес</span></div>
+                                    </div>
+                                    {reserveData.target_amount_future != null && reserveData.target_amount_future > 0 && (
+                                        <div style={{ background: 'rgba(34,197,94,0.12)', padding: '8px 10px', borderRadius: '8px' }}>
+                                            <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Прогноз через год</div>
+                                            <div style={{ fontSize: '14px', fontWeight: '800', color: '#15803d', whiteSpace: 'nowrap' }}>{formatMoney(reserveData.target_amount_future)}</div>
+                                        </div>
+                                    )}
+                                    <div style={{ background: 'rgba(255,255,255,0.8)', padding: '8px 10px', borderRadius: '8px' }}>
+                                        <div style={{ fontSize: '10px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px', marginBottom: '2px' }}>Доходность портфеля</div>
+                                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b' }}>
+                                            {reserveData.yieldPercent != null && reserveData.yieldPercent > 0 ? `≈ ${reserveData.yieldPercent}% год.` : '—'}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                     <div
                         className="premium-card"
                         style={{

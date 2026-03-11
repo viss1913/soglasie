@@ -43,8 +43,6 @@ export const GOAL_TYPE_BUSINESS_START = 16;
 // Each item represents a card in the gallery
 export const GOAL_GALLERY_ITEMS = [
     { id: 'pension', typeId: GOAL_TYPE_PENSION, title: 'Достойная пенсия', image: gospensiya, description: 'На старость' },
-    { id: 'passive', typeId: GOAL_TYPE_PASSIVE_INCOME, title: 'Пассивный доход', image: passivnyy, description: 'Жить на проценты' },
-    { id: 'rent', typeId: GOAL_TYPE_RENT, title: 'Рента с капитала', image: rent, description: 'Рента' },
     { id: 'edu', typeId: GOAL_TYPE_OTHER, title: 'Образование ребёнка', image: education, description: 'Детям' },
     { id: 'appartment', typeId: GOAL_TYPE_REAL_ESTATE, title: 'Квартира', image: kvartira, description: 'Жить отдельно' },
     { id: 'house', typeId: GOAL_TYPE_REAL_ESTATE, title: 'Загородный дом', image: zagorod, description: 'Трава у дома' },
@@ -52,7 +50,6 @@ export const GOAL_GALLERY_ITEMS = [
     { id: 'relocate', typeId: GOAL_TYPE_RELOCATION, title: 'Переезд', image: pereezd, description: 'Сменить место' },
     { id: 'safe_grow', typeId: GOAL_TYPE_SAVE_AND_MULTIPLY, title: 'Сохранить и преумножить', image: invest, description: 'Капитал' },
     // { id: 'reserve', typeId: GOAL_TYPE_FINANCIAL_RESERVE, title: 'Финансовый резерв', image: finReserve, description: 'На всякий случай' },
-    { id: 'life', typeId: GOAL_TYPE_LIFE, title: 'Защита жизни', image: lifeInsurance, description: 'На всякий случай' },
     { id: 'auto', typeId: GOAL_TYPE_VEHICLE, title: 'Автомобиль', image: avtomobil, description: 'Средство передвижения' },
     { id: 'travel', typeId: GOAL_TYPE_VACATION_TRAVEL, title: 'Путешествие', image: puteshestvie, description: 'Посмотреть мир' },
     { id: 'business', typeId: GOAL_TYPE_BUSINESS_START, title: 'Свой бизнес', image: business, description: 'Свое дело' },
