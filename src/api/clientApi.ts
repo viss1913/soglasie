@@ -28,12 +28,16 @@ api.interceptors.request.use((config) => {
 export const clientApi = {
     // --- AUTH ---
     registerFast: async (payload: { email: string, password: string, fio?: string }): Promise<any> => {
-        const response = await api.post('/auth/register-fast', {
+        const data: any = {
             email: payload.email,
             password: payload.password,
-            fio: payload.fio,
             project_key: PROJECT_KEY,
-        });
+        };
+        if (payload.fio) {
+            data.name = payload.fio;
+        }
+
+        const response = await api.post('/auth/register-fast', data);
         return response.data;
     },
 
