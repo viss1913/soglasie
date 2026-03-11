@@ -32,6 +32,7 @@ export const clientApi = {
             email: payload.email,
             password: payload.password,
             fio: payload.fio,
+            project_key: PROJECT_KEY,
         });
         return response.data;
     },
