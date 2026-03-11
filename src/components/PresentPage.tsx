@@ -135,24 +135,25 @@ const PresentPage: React.FC<PresentPageProps> = ({ clientData, onViewPlan, onSta
     const totalInitial = initialInstruments.reduce((sum: number, i: any) => sum + i.amount, 0);
     const totalMonthly = monthlyInstruments.reduce((sum: number, i: any) => sum + i.amount, 0);
 
+    const reserveGoal = useMemo(() => calcGoals.find((g: any) => g.goal_type_id === 7) || goals.find((g: any) => g.goal_type_id === 7), [calcGoals, goals]);
+
     const reserveData = useMemo(() => {
-        const reserveGoal = calcGoals.find((g: any) => g.goal_type_id === 7);
         if (!reserveGoal) {
-            const fallback = goals.find((g: any) => g.goal_type_id === 7);
             return {
-                initial: fallback?.initial_capital || 0,
-                monthly: fallback?.monthly_replenishment || 0,
-                target_amount_future: undefined as number | undefined,
-                yieldPercent: undefined as number | undefined,
-            };
-        }
-        const initialSum = (reserveGoal.details?.initial_instruments || []).reduce((s: number, i: any) => s + (i.amount || 0), 0);
-        const monthlySum = (reserveGoal.details?.monthly_instruments || []).reduce((s: number, i: any) => s + (i.amount || 0), 0);
-        const summary = reserveGoal.summary || {};
-        const target_amount_future = summary.target_amount_future ?? reserveGoal.details?.target_amount_future;
-        const yieldPercent = reserveGoal.accumulation_yield_percent ?? reserveGoal.details?.accumulation_yield_percent ?? summary.yield_percent;
-        return { initial: initialSum, monthly: monthlySum, target_amount_future, yieldPercent };
-    }, [calcGoals, goals]);
+                return {
+                    initial: fallback?.initial_capital || 0,
+                    monthly: fallback?.monthly_replenishment || 0,
+                    target_amount_future: undefined as number | undefined,
+                    yieldPercent: undefined as number | undefined,
+                };
+            }
+            const initialSum = (reserveGoal.details?.initial_instruments || []).reduce((s: number, i: any) => s + (i.amount || 0), 0);
+            const monthlySum = (reserveGoal.details?.monthly_instruments || []).reduce((s: number, i: any) => s + (i.amount || 0), 0);
+            const summary = reserveGoal.summary || {};
+            const target_amount_future = summary.target_amount_future ?? reserveGoal.details?.target_amount_future;
+            const yieldPercent = reserveGoal.accumulation_yield_percent ?? reserveGoal.details?.accumulation_yield_percent ?? summary.yield_percent;
+            return { initial: initialSum, monthly: monthlySum, target_amount_future, yieldPercent };
+        }, [calcGoals, goals]);
 
     const insuranceData = useMemo(() => {
         // Ищем сначала в calcGoals (там полные details), потом в goals
